@@ -1,20 +1,21 @@
 ---------------------------------------------------------------------------
--- FILE    : check_der.adb
--- SUBJECT : Package containing tests of the ASN.1 Distinguished Encoding Rules.
--- AUTHOR  : (C) Copyright 2014 by Peter Chapin
+-- FILE    : check_der_decode.adb
+-- SUBJECT : Package containing tests of ASN.1 DER decoding.
+-- AUTHOR  : (C) Copyright 2015 by Peter Chapin
 --
 -- Please send comments or bug reports to
 --
 --      Peter Chapin <PChapin@vtc.vsc.edu>
 ---------------------------------------------------------------------------
 with AUnit.Assertions;
-with Hermes.DER;
+with Hermes.DER.Decode;
 
 use AUnit.Assertions;
 use Hermes;
 use Hermes.DER;
+use Hermes.DER.Decode;
 
-package body Check_DER is
+package body Check_DER_Decode is
 
    type Octet_Array_Access is access Octet_Array;
 
@@ -179,7 +180,7 @@ package body Check_DER is
       Test_Status : Status_Type;
    begin
       for I in Test_Cases'Range loop
-         DER.Get_Integer_Value(Test_Cases(I).Input.Data.all, Test_Cases(I).Input.Start, Test_Stop, Test_Value, Test_Status);
+         Get_Integer_Value(Test_Cases(I).Input.Data.all, Test_Cases(I).Input.Start, Test_Stop, Test_Value, Test_Status);
          Assert
            (Test_Stop   = Test_Cases(I).Expected.Stop   and
             Test_Value  = Test_Cases(I).Expected.Value  and
@@ -189,16 +190,16 @@ package body Check_DER is
    end Test_Get_Integer;
 
 
-   procedure Register_Tests(T : in out DER_Test) is
+   procedure Register_Tests(T : in out DER_Decode_Test) is
    begin
       AUnit.Test_Cases.Registration.Register_Routine(T, Test_Get_Length'Access, "Get Length");
       AUnit.Test_Cases.Registration.Register_Routine(T, Test_Get_Integer'Access, "Get Integer");
    end Register_Tests;
 
 
-   function Name(T : DER_Test) return AUnit.Message_String is
+   function Name(T : DER_Decode_Test) return AUnit.Message_String is
    begin
-      return AUnit.Format("DER");
+      return AUnit.Format("DER.Decode");
    end Name;
 
-end Check_DER;
+end Check_DER_Decode;

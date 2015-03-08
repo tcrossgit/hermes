@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
--- FILE    : hermes-der.adb
--- SUBJECT : Body of a package for handling the distinguished encoding rules.
--- AUTHOR  : (C) Copyright 2014 by Peter Chapin
+-- FILE    : hermes-der-decode.adb
+-- SUBJECT : Body of a package for decoding DER encoded data.
+-- AUTHOR  : (C) Copyright 2015 by Peter Chapin
 --
 -- Please send comments or bug reports to
 --
@@ -9,70 +9,8 @@
 ---------------------------------------------------------------------------
 pragma SPARK_Mode(On);
 
-package body Hermes.DER is
-
-   function Make_Leading_Identifier
-     (Tag_Class       : Tag_Class_Type;
-      Structured_Flag : Structured_Flag_Type;
-      Tag             : Leading_Number_Type) return Octet is
-
-      Tag_Class_Lookup_Table : constant array(Tag_Class_Type) of Octet :=
-        (Class_Universal        => 2#0000_0000#,
-         Class_Application      => 2#0100_0000#,
-         Class_Context_Specific => 2#1000_0000#,
-         Class_Private          => 2#1100_0000#);
-
-      Structured_Flag_Lookup_Table : constant array(Structured_Flag_Type) of Octet :=
-        (Primitive              => 2#0000_0000#,
-         Constructed            => 2#0010_0000#);
-
-      Leading_Number_Lookup_Table : constant array(Leading_Number_Type) of Octet :=
-        (Tag_Reserved           =>  0,
-         Tag_Boolean            =>  1,
-         Tag_Integer            =>  2,
-         Tag_Bit_String         =>  3,
-         Tag_Octet_String       =>  4,
-         Tag_Null               =>  5,
-         Tag_Object_Identifier  =>  6,
-         Tag_Object_Descriptor  =>  7,
-         Tag_Instance_Of        =>  8,
-         Tag_External           =>  8,  -- Same as Instance_Of
-         Tag_Real               =>  9,
-         Tag_Enumerated         => 10,
-         Tag_Embedded_PDV       => 11,
-         Tag_UTF8_String        => 12,
-         Tag_Relative_OID       => 13,
-         -- Values 14 .. 15 omitted (not defined?)
-         Tag_Sequence           => 16,
-         Tag_Sequence_Of        => 16,  -- Same as Sequence
-         Tag_Set                => 17,
-         Tag_Set_Of             => 17,  -- Same as Set
-         Tag_Numeric_String     => 18,
-         Tag_Printable_String   => 19,
-         Tag_Teletex_String     => 20,
-         Tag_T61_String         => 20,  -- Same as Teletex_String
-         Tag_Videotex_String    => 21,
-         Tag_IA5_String         => 22,
-         Tag_UTC_Time           => 23,
-         Tag_Generalized_Time   => 24,
-         Tag_Graphic_String     => 25,
-         Tag_Visible_String     => 26,
-         Tag_ISO646_String      => 26,  -- Same as Visible_String
-         Tag_General_String     => 27,
-         Tag_Universal_String   => 28,
-         Tag_Character_String   => 29,
-         Tag_BMP_String         => 30,
-         Tag_EXTENDED_TAG       => 31);
-
-
-   begin
-      return
-        Tag_Class_Lookup_Table(Tag_Class)             or
-        Structured_Flag_Lookup_Table(Structured_Flag) or
-        Leading_Number_Lookup_Table(Tag);
-   end Make_Leading_Identifier;
-
-
+package body Hermes.DER.Decode is
+   
    procedure Split_Leading_Identifier
      (Value           : in  Octet;
       Tag_Class       : out Tag_Class_Type;
@@ -172,7 +110,7 @@ package body Hermes.DER is
 
    procedure Get_Length_Value
      (Message : in  Octet_Array;
-      Index   : in  Natural;
+      Start   : in  Natural;
       Stop    : out Natural;
       Length  : out Natural;
       Status  : out Status_Type) is
@@ -209,30 +147,30 @@ package body Hermes.DER is
 
    begin
       -- Check for indefinite length.
-      if Message(Index) = 2#1000_0000# then
-         Stop   := Index;
+      if Message(Start) = 2#1000_0000# then
+         Stop   := Start;
          Length := 0;
          Status := Indefinite_Length;
 
       -- Check for definite length, short form.
-      elsif (Message(Index) and 2#1000_0000#) = 2#0000_0000# then
-         Stop   := Index;
-         Length := Natural(Message(Index));
+      elsif (Message(Start) and 2#1000_0000#) = 2#0000_0000# then
+         Stop   := Start;
+         Length := Natural(Message(Start));
          Status := Success;
 
       -- Check for definite length, long form, reserved value.
-      elsif Message(Index) = 2#1111_1111# then
-         Stop   := Index;
+      elsif Message(Start) = 2#1111_1111# then
+         Stop   := Start;
          Length := 0;
          Status := Bad_Length;
 
       -- We have definite length, long form, normal value.
       else
-         pragma Assert(Check => Message(Index) - 128 >= 1);
-         Length_Of_Length := Length_Of_Length_Type(Message(Index) and 2#0111_1111#);
+         pragma Assert(Check => Message(Start) - 128 >= 1);
+         Length_Of_Length := Length_Of_Length_Type(Message(Start) and 2#0111_1111#);
 
          -- Check that all length octets are in the array.
-         if Index > Message'Last - Length_Of_Length then
+         if Start > Message'Last - Length_Of_Length then
             Stop   := Message'Last;  -- Desired value of Stop not specified.
             Length := 0;
             Status := Bad_Length;
@@ -243,15 +181,15 @@ package body Hermes.DER is
          -- TODO: It is allowed to encode small lengths with a lot of leading zeros so
          -- Length_Of_Length > 4 might be ok. NO! The DER rules do not allow this (right?)
          --
-         elsif Length_Of_Length > 4 or (Length_Of_Length = 4 and Message(Index + 1) >= 128) then
-            Stop   := Index + Length_Of_Length;
+         elsif Length_Of_Length > 4 or (Length_Of_Length = 4 and Message(Start + 1) >= 128) then
+            Stop   := Start + Length_Of_Length;
             Length := 0;
             Status := Unimplemented_Length;
 
          -- Convert the length into a single Natural.
          else
-            Stop   := Index + Length_Of_Length;
-            Length := Convert_Length(Index + 1, Length_Of_Length);
+            Stop   := Start + Length_Of_Length;
+            Length := Convert_Length(Start + 1, Length_Of_Length);
             Status := Success;
          end if;
       end if;
@@ -260,7 +198,7 @@ package body Hermes.DER is
 
    procedure Get_Integer_Value
      (Message : in  Octet_Array;
-      Index   : in  Natural;
+      Start   : in  Natural;
       Stop    : out Natural;
       Value   : out Integer;
       Status  : out Status_Type) is
@@ -363,24 +301,24 @@ package body Hermes.DER is
 
    begin
       Split_Leading_Identifier
-        (Message(Index), Tag_Class, Structured_Flag, Tag, Identifier_Status);
+        (Message(Start), Tag_Class, Structured_Flag, Tag, Identifier_Status);
       if Identifier_Status /= Success         or
          Tag_Class         /= Class_Universal or
          Structured_Flag   /= Primitive       or
          Tag               /= Tag_Integer     then
 
-         Stop   := Index;
+         Stop   := Start;
          Value  := 0;
          Status := Bad_Value;
       else
-         if Index + 1 > Message'Last then
-            Stop   := Index;
+         if Start + 1 > Message'Last then
+            Stop   := Start;
             Value  := 0;
             Status := Bad_Value;
          else
-            Identifier_Ok(Index);
+            Identifier_Ok(Start);
          end if;
       end if;
    end Get_Integer_Value;
 
-end Hermes.DER;
+end Hermes.DER.Decode;
