@@ -196,6 +196,20 @@ package body Hermes.DER.Decode is
    end Get_Length_Value;
 
 
+   procedure Get_Boolean_Value
+     (Message : in  Octet_Array;
+      Start   : in  Natural;
+      Stop    : out Natural;
+      Value   : out Boolean;
+      Status  : out Status_Type) is
+   begin
+      -- Placeholder writes silly results to the out parameters.
+      Stop   := Start;
+      Value  := False;
+      Status := Bad_Value;
+   end Get_Boolean_Value;
+  
+
    procedure Get_Integer_Value
      (Message : in  Octet_Array;
       Start   : in  Natural;
@@ -322,17 +336,4 @@ package body Hermes.DER.Decode is
    end Get_Integer_Value;
 
    
-   procedure Get_Boolean_Value
-     (Message : in  Octet_Array;
-      Start   : in  Natural;
-      Stop    : out Natural;
-      Value   : out Boolean;
-      Status  : out Status_Type) is
-   begin
-      -- Placeholder writes silly results to the out parameters.
-      Stop   := Start;
-      Value  := False;
-      Status := Bad_Value;
-   end Get_Boolean_Value;
-  
 end Hermes.DER.Decode;

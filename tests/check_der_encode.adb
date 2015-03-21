@@ -21,19 +21,25 @@ package body Check_DER_Encode is
 
    procedure Test_Put_Length(T : in out AUnit.Test_Cases.Test_Case'Class) is
    begin
-      null;
+      raise Program_Error;
    end Test_Put_Length;
+
+   procedure Test_Put_Boolean(T : in out AUnit.Test_Cases.Test_Case'Class) is
+   begin
+      raise Program_Error;
+   end Test_Put_Boolean;
 
 
    procedure Test_Put_Integer(T : in out AUnit.Test_Cases.Test_Case'Class) is
    begin
-      null;
+      raise Program_Error;
    end Test_Put_Integer;
 
 
    procedure Register_Tests(T : in out DER_Encode_Test) is
    begin
       AUnit.Test_Cases.Registration.Register_Routine(T, Test_Put_Length'Access, "Put Length");
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Put_Boolean'Access, "Put Boolean");
       AUnit.Test_Cases.Registration.Register_Routine(T, Test_Put_Integer'Access, "Put Integer");
    end Register_Tests;
 

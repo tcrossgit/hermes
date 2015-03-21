@@ -107,6 +107,12 @@ package body Check_DER_Decode is
    end Test_Get_Length;
 
 
+   procedure Test_Get_Boolean(T : in out AUnit.Test_Cases.Test_Case'Class) is
+   begin
+      raise Program_Error;
+   end Test_Get_Boolean;
+
+
    procedure Test_Get_Integer(T : in out AUnit.Test_Cases.Test_Case'Class) is
       type Input_Record is
          record
@@ -190,17 +196,11 @@ package body Check_DER_Decode is
    end Test_Get_Integer;
 
 
-   procedure Test_Get_Boolean(T : in out AUnit.Test_Cases.Test_Case'Class) is
-   begin
-      raise Program_Error;
-   end Test_Get_Boolean;
-
-
    procedure Register_Tests(T : in out DER_Decode_Test) is
    begin
       AUnit.Test_Cases.Registration.Register_Routine(T, Test_Get_Length'Access, "Get Length");
-      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Get_Integer'Access, "Get Integer");
       AUnit.Test_Cases.Registration.Register_Routine(T, Test_Get_Boolean'Access, "Get Boolean");
+      AUnit.Test_Cases.Registration.Register_Routine(T, Test_Get_Integer'Access, "Get Integer");
    end Register_Tests;
 
 

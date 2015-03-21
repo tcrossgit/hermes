@@ -52,6 +52,29 @@ package Hermes.DER.Decode is
        Pre => Start in Message'Range;
 
 
+   -- Examines the Message starting at position Start looking for a DER encoded boolean.
+   --
+   -- Message => The message to examine.
+   -- Start   => The starting position in the message where the integer is to be extracted.
+   -- Stop    => The last position in the message used by the encoded integer.
+   -- Value   => The extracted boolean.
+   -- Status  => The status of the extraction (success/failure, etc).
+   --
+   -- Decodes a DER encoded boolean from the given message. Fails with DER.Bad_Value if the data
+   -- is not encoded properly. In that case the returned Value is zero and the returned Stop is
+   -- undefined (it will depend on the precise nature of the encoding problem).
+   --
+   procedure Get_Boolean_Value
+     (Message : in  Octet_Array;
+      Start   : in  Natural;
+      Stop    : out Natural;
+      Value   : out Boolean;
+      Status  : out Status_Type)
+     with
+       Depends => ( (Stop, value, Status) => (Message, Start) ),
+       Pre => Start in Message'Range;
+   
+
    -- Examines the Message starting at position Start looking for a DER encoded integer.
    --
    -- Message => The message to examine.
@@ -72,29 +95,6 @@ package Hermes.DER.Decode is
       Start   : in  Natural;
       Stop    : out Natural;
       Value   : out Integer;
-      Status  : out Status_Type)
-     with
-       Depends => ( (Stop, value, Status) => (Message, Start) ),
-       Pre => Start in Message'Range;
-   
-   
-   -- Examines the Message starting at position Start looking for a DER encoded boolean.
-   --
-   -- Message => The message to examine.
-   -- Start   => The starting position in the message where the integer is to be extracted.
-   -- Stop    => The last position in the message used by the encoded integer.
-   -- Value   => The extracted boolean.
-   -- Status  => The status of the extraction (success/failure, etc).
-   --
-   -- Decodes a DER encoded boolean from the given message. Fails with DER.Bad_Value if the data
-   -- is not encoded properly. In that case the returned Value is zero and the returned Stop is
-   -- undefined (it will depend on the precise nature of the encoding problem).
-   --
-   procedure Get_Boolean_Value
-     (Message : in  Octet_Array;
-      Start   : in  Natural;
-      Stop    : out Natural;
-      Value   : out Boolean;
       Status  : out Status_Type)
      with
        Depends => ( (Stop, value, Status) => (Message, Start) ),

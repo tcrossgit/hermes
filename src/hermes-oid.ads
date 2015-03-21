@@ -14,8 +14,8 @@ package Hermes.OID is
    -- Components_Type holds object identifiers as an array of component values.
    Maximum_Component_Count : constant := 15;
    type    Component_Type is range 0 .. Integer'Last;
-   subtype Component_Count_Type is Integer range 0 .. Maximum_Component_Count;
-   subtype Component_Index_Type is Integer range 1 .. Maximum_Component_Count;
+   subtype Component_Count_Type is Natural range 0 .. Maximum_Component_Count;
+   subtype Component_Index_Type is Positive range 1 .. Maximum_Component_Count;
    type    Components_Type is array(Component_Index_Type range <>) of Component_Type;
    type    Status_Type is (Success, Invalid_Root, Invalid_Second_Level, Insufficient_Space);
 
@@ -35,7 +35,7 @@ package Hermes.OID is
    -- Result array is filled with zero component values.
    --
    procedure To_Separates
-     (Identifier           : Object_Identifier;
+     (Identifier           : in  Object_Identifier;
       Result               : out Components_Type;
       Number_Of_Components : out Component_Count_Type)
      with

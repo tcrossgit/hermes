@@ -71,5 +71,30 @@ package body Hermes.DER.Encode is
         Leading_Number_Lookup_Table(Tag);
    end Make_Leading_Identifier;
    
+   
+   function Put_Length_Value(Length : Natural) return Hermes.Octet_Array is
+      Dummy : Hermes.Octet_Array(1 .. 0);
+   begin
+      raise Program_Error with "Hermes.DER.Encode.Put_Length_Value not implemented";
+      return Dummy;
+   end Put_Length_Value;
+   
+   
+   function Put_Boolean_Value(Value : Boolean) return Hermes.Octet_Array is
+      Dummy : Hermes.Octet_Array(1 .. 0);
+   begin
+      raise Program_Error with "Hermes.DER.Encode.Put_Boolean_Value not implemented";
+      return Dummy;
+   end Put_Boolean_Value;
+   
+
+   function Put_Integer_Value(Value : Integer) return Hermes.Octet_Array is
+      Dummy : Hermes.Octet_Array(1 .. 0);
+   begin
+      raise Program_Error with "Hermes.DER.Encode.Put_Integer_Value not implemented";
+      return Dummy;
+   end Put_Integer_Value;
+     
+   
 end Hermes.DER.Encode;
 
