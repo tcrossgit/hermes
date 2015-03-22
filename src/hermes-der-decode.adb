@@ -322,17 +322,129 @@ package body Hermes.DER.Decode is
    end Get_Integer_Value;
 
    
+-- GET_BOOLEAN
    procedure Get_Boolean_Value
      (Message : in  Octet_Array;
       Start   : in  Natural;
       Stop    : out Natural;
       Value   : out Boolean;
       Status  : out Status_Type) is
+
+      Tag_Class         : Tag_Class_Type;
+      Structured_Flag   : Structured_Flag_Type;
+      Tag               : Leading_Number_Type;
+      Identifier_Status : Status_Type;
+
+
+      -- This procedure is called after the identifier and length octets have been validated. It
+      -- extracts the actual integer from the message. Length_Stop is the last octet of the
+      -- length.
+      --
+      procedure Identifier_And_Length_Ok
+        (Length      : in  Natural;
+         Length_Stop : in  Natural)
+        with
+          Global => ( Input => Message, Output => (Stop, Value, Status) ),
+          Depends => (Stop   => (Length_Stop, Length),
+                      Status => null,
+                      Value  => (Length_Stop, Length, Message) ),
+          Pre => Length <= 4 and Message'First < Length_Stop and Length_Stop <= Message'Last
+      is
+         --TODO: Need to fix dependency of Value or include Length somehow???
+      begin
+         Stop   := Length_Stop + Length;
+         Status := Success;
+
+--      if Message(Length_Stop + 1 .. Stop) = 2#1111_1111# then 
+        if Message(Length_Stop + 1) = 2#1111_1111# then 
+            Value := True;
+--              Status := Success;
+        elsif Message(Length_Stop + 1) = 2#0000_0000# then
+            Value := False;
+--              Status := Success;
+        else
+            Value := False;
+--              Status := Bad_Value; 
+        end if;
+      end Identifier_And_Length_Ok;
+
+
+      -- This procedure is called after the identifier octets have been validated. It extracts
+      -- the length from the message. Identifier_Stop is the last octet of the indentifier.
+      --
+      procedure Identifier_Ok(Identifier_Stop : in Natural)
+        with
+          Global => ( Input => Message, Output => (Stop, Value, Status) ),
+          Depends => ( (Stop, Value, Status) => (Message, Identifier_Stop) ),
+          Pre => Message'First <= Identifier_Stop and Identifier_Stop < Message'Last
+      is
+         Length_Stop   : Natural;
+         Length        : Natural;
+         Length_Status : Status_Type;
+      begin
+         Get_Length_Value(Message, Identifier_Stop + 1, Length_Stop, Length, Length_Status);
+         if Length_Status /= Success then
+            -- We couldn't decode the length.
+            Stop   := Length_Stop;
+            Value  := False; -- added this to assign value(but it's a Bad_Value)
+            Status := Bad_Value;
+         elsif Length_Stop + Length > Message'Last then
+            -- The value goes off the end of the message.
+            Stop   := Message'Last;
+            Value  := False; -- added this to assign value(but it's a Bad_Value)
+            Status := Bad_Value;
+         elsif Length > 4 then
+            -- The length implies too large a value.
+            Stop   := Length_Stop + Length;
+            Value  := False;
+            Status := Unimplemented_Value;
+
+-- TODO: might need to remove the following elsif because the value
+-- for boolean could contain leading zeros
+--         elsif Length >= 2 and then (Message(Length_Stop + 1) = 16#00# and (Message(Length_Stop + 2) and 16#80#) = 16#00#) then
+            -- The value has too many leading zeros. (Should this check be moved to
+            -- Identifier_And_Length_Ok?
+            --
+--          Stop   := Length_Stop + Length;
+--          Value  := False;
+--          Status := Bad_Value;
+			
+-- TODO: might need to remove the following elsif because the message 
+-- for boolean could contain leading ones
+			
+--         elsif Length >= 2 and then (Message(Length_Stop + 1) = 16#FF# and (Message(Length_Stop + 2)  or 16#7F#) = 16#FF#) then
+            -- The value has too many leading ones. (Should this check be moved to
+            -- Identifier_And_Length_Ok?
+            --
+--          Stop   := Length_Stop + Length;
+--          Value  := 0;
+--          Status := Bad_Value;
+         else
+            -- Leading identifier is ok. Length is ok. Boolean value starts at Length_Stop + 1.
+            Identifier_And_Length_Ok(Length, Length_Stop);
+         end if;
+      end Identifier_Ok;
+
    begin
-      -- Placeholder writes silly results to the out parameters.
-      Stop   := Start;
-      Value  := False;
-      Status := Bad_Value;
-   end Get_Boolean_Value;
-  
+      Split_Leading_Identifier
+        (Message(Start), Tag_Class, Structured_Flag, Tag, Identifier_Status);
+      if Identifier_Status /= Success         or
+         Tag_Class         /= Class_Universal or
+         Structured_Flag   /= Primitive       or
+         Tag               /= Tag_Boolean     then -- switched to boolean 
+
+         Stop   := Start;
+         Value  := False;  -- added this to assign value(but it's a Bad_Value)
+         Status := Bad_Value;
+      else
+         if Start + 1 > Message'Last then
+            Stop   := Start;
+            Value  := False;  -- added this to assign value(but it's a Bad_Value)
+            Status := Bad_Value;
+         else
+            Identifier_Ok(Start);
+         end if;
+      end if;
+   end Get_Boolean_Value;  
+   
 end Hermes.DER.Decode;
