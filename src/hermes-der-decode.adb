@@ -347,10 +347,10 @@ package body Hermes.DER.Decode is
           Global => ( Input => Message, Output => (Stop, Value, Status) ),
           Depends => (Stop   => (Length_Stop, Length),
                       Status => null,
-                      Value  => (Length_Stop, Length, Message) ),
+                      Value  => (Length_Stop, Message) ),
           Pre => Length <= 4 and Message'First < Length_Stop and Length_Stop <= Message'Last
       is
-         --TODO: Need to fix dependency of Value or include Length somehow???
+         --TODO: Need to fix dependency of Value or include Length or not somehow???
       begin
          Stop   := Length_Stop + Length;
          Status := Success;
