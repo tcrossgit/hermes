@@ -328,7 +328,8 @@ package body Hermes.DER.Decode is
       Start   : in  Natural;
       Stop    : out Natural;
       Value   : out Boolean;
-      Status  : out Status_Type) is
+      Status  : out Status_Type)        
+   is
 
       Tag_Class         : Tag_Class_Type;
       Structured_Flag   : Structured_Flag_Type;
@@ -348,11 +349,14 @@ package body Hermes.DER.Decode is
           Depends => (Stop   => (Length_Stop, Length),
                       Status => null,
                       Value  => (Length_Stop, Message) ),
-          Pre => Length <= 4 and Message'First < Length_Stop and Length_Stop <= Message'Last
+          Pre => Length <= 4 and Message'First < Length_Stop and Length_Stop + Length <= Message'Last        
+          -- last precondition was Length_Stop <= Message'Last. Switch to try and make work
+      
       is
-         --TODO: Need to fix dependency of Value or include Length or not somehow???
+         --TODO: Need to fix overflow check and array index check somehow???
       begin
-         Stop   := Length_Stop + Length;
+--           Stop   := (Length_Stop + 1) + Length; -- added this to try and make work
+         Stop   := Length_Stop + Length; 
          Status := Success;
 
 --      if Message(Length_Stop + 1 .. Stop) = 2#1111_1111# then 
