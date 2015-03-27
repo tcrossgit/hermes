@@ -49,19 +49,20 @@ package Hermes.DER.Decode is
       Status  : out Status_Type)
      with
        Depends => ( (Stop, Length, Status) => (Message, Start) ),
-       Pre => Start in Message'Range;
+       Pre => Start in Message'Range,
+       Post => Stop in Start .. Message'Last;
 
 
-   -- Examines the Message starting at position Start looking for a DER encoded boolean.
+   -- Examines the Message starting at position Start looking for a DER encoded Boolean.
    --
    -- Message => The message to examine.
-   -- Start   => The starting position in the message where the integer is to be extracted.
-   -- Stop    => The last position in the message used by the encoded integer.
-   -- Value   => The extracted boolean.
+   -- Start   => The starting position in the message where the Boolean is to be extracted.
+   -- Stop    => The last position in the message used by the encoded Boolean.
+   -- Value   => The extracted Boolean.
    -- Status  => The status of the extraction (success/failure, etc).
    --
-   -- Decodes a DER encoded boolean from the given message. Fails with DER.Bad_Value if the data
-   -- is not encoded properly. In that case the returned Value is zero and the returned Stop is
+   -- Decodes a DER encoded Boolean from the given message. Fails with DER.Bad_Value if the data
+   -- is not encoded properly. In that case the returned Value is False and the returned Stop is
    -- undefined (it will depend on the precise nature of the encoding problem).
    --
    procedure Get_Boolean_Value
@@ -72,7 +73,8 @@ package Hermes.DER.Decode is
       Status  : out Status_Type)
      with
        Depends => ( (Stop, value, Status) => (Message, Start) ),
-       Pre => Start in Message'Range;
+       Pre => Start in Message'Range,
+       Post => Stop in Start .. Message'Last;
    
 
    -- Examines the Message starting at position Start looking for a DER encoded integer.
@@ -98,6 +100,7 @@ package Hermes.DER.Decode is
       Status  : out Status_Type)
      with
        Depends => ( (Stop, value, Status) => (Message, Start) ),
-       Pre => Start in Message'Range;
+       Pre => Start in Message'Range,
+       Post => Stop in Start .. Message'Last;
    
 end Hermes.DER.Decode;
