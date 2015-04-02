@@ -26,5 +26,10 @@ package Hermes.DER.Encode is
    -- Returns the DER encoded TLV triple of an integer value.
    function Put_Integer_Value(Value : Integer) return Hermes.Octet_Array;
    
+   --Returns DER encoded TLV triple of an integer value.
+--     for Tag_Null = 5 NOT 14 & 15, didn't know if 
+--     I should include these other two into Put_Null or not 
+   function Put_Null_Value return Hermes.Octet_Array;
+   
 end Hermes.DER.Encode;
 
