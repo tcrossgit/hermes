@@ -8,9 +8,11 @@
 --      Peter Chapin <PChapin@vtc.vsc.edu>
 ---------------------------------------------------------------------------
 pragma SPARK_Mode(On);
+with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
+with Ada.Text_IO; use Ada.Text_IO;
 
 package body Hermes.DER.Encode is
-   
+
    function Make_Leading_Identifier
      (Tag_Class       : Tag_Class_Type;
       Structured_Flag : Structured_Flag_Type;
@@ -79,22 +81,50 @@ package body Hermes.DER.Encode is
       return Dummy;
    end Put_Length_Value;
    
-   
-   function Put_Boolean_Value(Value : Boolean) return Hermes.Octet_Array is
-      Dummy : Hermes.Octet_Array(1 .. 0);
-   begin
-      raise Program_Error with "Hermes.DER.Encode.Put_Boolean_Value not implemented";
-      return Dummy;
-   end Put_Boolean_Value;
-   
+--TODO: add spark conditions     
+   function Put_Boolean_Value(Value : Boolean) return Hermes.Octet_Array is      
+       Boolean_Octet_Array  : Hermes.Octet_Array(1 .. 0);
+       Boolean_Value_Octet  : Hermes.Octet;
+   begin   
+      
+       if Value = False then
+          Boolean_Value_Octet := 2#0000_0000#;
+       elsif Value = True then
+          Boolean_Value_Octet := 2#1111_1111#;
+       end if;
+ 
+       Boolean_Octet_Array :=
+            (Make_Leading_Identifier(Tag_Class => Class_Universal,
+                                     Structured_Flag => Primitive,
+                                     Tag => Tag_Boolean)
+             & 2#0000_0001#       --set length(length won't change for boolean
+             & Boolean_Value_Octet);
+      
+ --        raise Program_Error with "Hermes.DER.Encode.Put_Boolean_Value not imp
+       return Boolean_Octet_Array;
+    end Put_Boolean_Value;
 
+--Put_Integer_Value
    function Put_Integer_Value(Value : Integer) return Hermes.Octet_Array is
-      Dummy : Hermes.Octet_Array(1 .. 0);
-   begin
-      raise Program_Error with "Hermes.DER.Encode.Put_Integer_Value not implemented";
-      return Dummy;
+     package Int_IO is new Integer_IO(Integer); use Int_IO;
+      Integer_Octet_Array  : Hermes.Octet_Array(1 .. 0);
+   begin   
+      
+             raise Program_Error with "Hermes.DER.Encode.Put_Integer_Value not implemented";
+      return Integer_Octet_Array;
    end Put_Integer_Value;
      
+   function Put_Null_Value return Hermes.Octet_Array is
+      Null_Octet_Array  : Hermes.Octet_Array(1..0); 
+   begin
+      Null_Octet_Array := (Make_Leading_Identifier(Tag_Class       => Class_Universal,
+                                                   Structured_Flag => Primitive,
+                                                   Tag             => Tag_Null) 
+                           & 2#0000_0000#);     
+                                 
+      return Null_Octet_Array;
+      end Put_Null_Value;
+   
    
 end Hermes.DER.Encode;
 
