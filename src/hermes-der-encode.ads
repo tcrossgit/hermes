@@ -18,13 +18,17 @@ package Hermes.DER.Encode is
       Tag             : Leading_Number_Type) return Octet;
    
    -- Returns the DER encoded length.
-   function Put_Length_Value(Length : Natural) return Hermes.Octet_Array;
+   function Put_Length_Value(Length : Natural) return Hermes.Octet_Array
+     with
+   Pre => Length in Natural'Range;
    
    -- Returns the DER encoded TLV triple of a Boolean value.
    function Put_Boolean_Value(Value : Boolean) return Hermes.Octet_Array;
 
    -- Returns the DER encoded TLV triple of an integer value.
-   function Put_Integer_Value(Value : Integer) return Hermes.Octet_Array;
+   function Put_Integer_Value(Value : Integer) return Hermes.Octet_Array
+     with
+   Pre => Value in Integer'Range;
    
    --Returns DER encoded TLV triple of an integer value.
 --     for Tag_Null = 5 NOT 14 & 15, didn't know if 
