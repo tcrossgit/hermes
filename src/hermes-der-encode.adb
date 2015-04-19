@@ -8,6 +8,7 @@
 --      Peter Chapin <PChapin@vtc.vsc.edu>
 ---------------------------------------------------------------------------
 pragma SPARK_Mode(On);
+
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Ada.Text_IO; use Ada.Text_IO;
 
@@ -100,18 +101,29 @@ package body Hermes.DER.Encode is
       raise Program_Error with "Hermes.DER.Encode.Put_Integer_Value not implemented";
       return Integer_Octet_Array;
    end Put_Integer_Value;
+   
+   
+   function Put_Octet_String_Value(Value : Hermes.Octet_Array) return Hermes.Octet_Array is
+     (Make_Leading_Identifier
+        (Tag_Class       => Class_Universal,
+         Structured_Flag => Primitive,
+         Tag             => Tag_Octet_String) & Put_Length_Value(Value'Length) & Value);
      
    
-   function Put_Null_Value return Hermes.Octet_Array is
-      Null_Octet_Array  : Hermes.Octet_Array := 
-        (Make_Leading_Identifier
-           (Tag_Class       => Class_Universal,
-            Structured_Flag => Primitive,
-            Tag             => Tag_Null) & 2#0000_0000#);
-   begin
-      return Null_Octet_Array;
-   end Put_Null_Value;
+   function Put_Null_Value return Hermes.Octet_Array is 
+     (Make_Leading_Identifier
+        (Tag_Class       => Class_Universal,
+         Structured_Flag => Primitive,
+         Tag             => Tag_Null) & 2#0000_0000#);
    
+   
+   function Put_OID_Value(Value : Hermes.OID.Object_Identifier) return Hermes.Octet_Array is
+      OID_Octet_Array : Hermes.Octet_Array(1 .. 0);
+   begin
+      raise Program_Error with "Hermes.DER.Encode.Put_OID_Value not implemented";
+      return OID_Octet_Array;
+   end Put_OID_Value;
+  
    
 end Hermes.DER.Encode;
 
