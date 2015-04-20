@@ -9,6 +9,8 @@
 ---------------------------------------------------------------------------
 pragma SPARK_Mode(On);
 
+with Hermes.OID;
+
 package Hermes.DER.Encode is
    
    -- Constructs an identifier octet from its constituent parts.
@@ -30,10 +32,14 @@ package Hermes.DER.Encode is
      with
    Pre => Value in Integer'Range;
    
-   --Returns DER encoded TLV triple of an integer value.
---     for Tag_Null = 5 NOT 14 & 15, didn't know if 
---     I should include these other two into Put_Null or not 
+   -- Returns the DER encoded TLV triple of an octet string.
+   function Put_Octet_String_Value(Value : Hermes.Octet_Array) return Hermes.Octet_Array;
+   
+   -- Returns the DER encoded TLV triple of a null value.
    function Put_Null_Value return Hermes.Octet_Array;
+   
+   -- Returns the DER encoded TLV triple of an object identifier value.
+   function Put_OID_Value(Value : Hermes.OID.Object_Identifier) return Hermes.Octet_Array;
    
 end Hermes.DER.Encode;
 

@@ -93,78 +93,46 @@ package body Hermes.DER.Encode is
       return Dummy;
    end Put_Length_Value;
    
+   
    function Put_Boolean_Value(Value : Boolean) return Hermes.Octet_Array is      
-       Boolean_Octet_Array  : Hermes.Octet_Array(1..3);
-       Boolean_Value_Octet  : Hermes.Octet := 0;
-   begin   
-      
-       if Value = False then
-          Boolean_Value_Octet := 2#0000_0000#;
-       elsif Value = True then
-          Boolean_Value_Octet := 2#1111_1111#;
-       end if;
- 
-       Boolean_Octet_Array :=
-            (Make_Leading_Identifier(Tag_Class => Class_Universal,
-                                     Structured_Flag => Primitive,
-                                     Tag => Tag_Boolean)
-             & 2#0000_0001#       --set length(length won't change for boolean
-             & Boolean_Value_Octet);
-      
- --        raise Program_Error with "Hermes.DER.Encode.Put_Boolean_Value not imp
-       return Boolean_Octet_Array;
-    end Put_Boolean_Value;
-
---Put_Integer_Value
-   function Put_Integer_Value(Value : Integer) return Hermes.Octet_Array is
-      Integer_Octet_Array  : Hermes.Octet_Array(1..0):= (others => 0);
-      Neg_Value : Integer := -(Value);
-      Temp_Octet : Hermes.Octet;
+      Boolean_Value_Octet : Hermes.Octet := (if Value then 2#1111_1111# else 2#0000_0000#);
+      Boolean_Octet_Array : Hermes.Octet_Array :=
+        (Make_Leading_Identifier
+           (Tag_Class       => Class_Universal,
+            Structured_Flag => Primitive,
+            Tag             => Tag_Boolean) & 2#0000_0001# & Boolean_Value_Octet);
    begin
-      --put tag for integer,create octet
-      if Value >= 0 and 2#1000_0000# /= 1 then      
-         Integer_Octet_Array := Make_Leading_Identifier(Tag_Class       => Class_Universal,                      
-                                                        Structured_Flag => Primitive,
-                                                        Tag             => Tag_Integer)
-        & Put_Length_Value(Value'Size)
-           & Hermes.Octet(Value);
-      elsif Value > 0 and 2#1000_0000# = 1 then
-         Integer_Octet_Array := Make_Leading_Identifier(Tag_Class       => Class_Universal,                      
-                                                        Structured_Flag => Primitive,
-                                                        Tag             => Tag_Integer)
-           & Put_Length_Value(Value'Size)
-           & 2#0000_0000# 
-           & Hermes.Octet(Value);
-      elsif Value < 0 then
---           Neg_Value := Value * (-1);-- make positive
-         Temp_Octet := Octet'Val(Integer'Pos(Neg_Value));-- convert
-         Temp_Octet := Temp_Octet xor 2#1111_1111#;-- invert bits
-         Temp_Octet := Temp_Octet + 2#1#;-- add one 
-         
-         
-         Integer_Octet_Array := Make_Leading_Identifier(Tag_Class       => Class_Universal,                      
-                                                        Structured_Flag => Primitive,
-                                                        Tag             => Tag_Integer)
-           & Put_Length_Value(Value'Size)
-           & Temp_Octet;
-      end if;
-       
-      --        raise Program_Error with "Hermes.DER.Encode.Put_Integer_Value not implemented";
+      return Boolean_Octet_Array;
+   end Put_Boolean_Value;
+
+   
+   function Put_Integer_Value(Value : Integer) return Hermes.Octet_Array is
+      Integer_Octet_Array : Hermes.Octet_Array(1 .. 0);
+   begin   
+      raise Program_Error with "Hermes.DER.Encode.Put_Integer_Value not implemented";
       return Integer_Octet_Array;
    end Put_Integer_Value;
-
---Put_Null                                
-   function Put_Null_Value return Hermes.Octet_Array is
-      Null_Octet_Array  : Hermes.Octet_Array(1..0); 
+   
+   
+   function Put_Octet_String_Value(Value : Hermes.Octet_Array) return Hermes.Octet_Array is
+     (Make_Leading_Identifier
+        (Tag_Class       => Class_Universal,
+         Structured_Flag => Primitive,
+         Tag             => Tag_Octet_String) & Put_Length_Value(Value'Length) & Value);
+     
+   
+   function Put_Null_Value return Hermes.Octet_Array is 
+     (Make_Leading_Identifier
+        (Tag_Class       => Class_Universal,
+         Structured_Flag => Primitive,
+         Tag             => Tag_Null) & 2#0000_0000#);
+   
+   
+   function Put_OID_Value(Value : Hermes.OID.Object_Identifier) return Hermes.Octet_Array is
+      OID_Octet_Array : Hermes.Octet_Array(1 .. 0);
    begin
-      Null_Octet_Array := (Make_Leading_Identifier(Tag_Class       => Class_Universal,
-                                                   Structured_Flag => Primitive,
-                                                   Tag             => Tag_Null) 
-                           & 2#0000_0000#);     
-                                 
-      return Null_Octet_Array;
-      end Put_Null_Value;
-   
-   
+      raise Program_Error with "Hermes.DER.Encode.Put_OID_Value not implemented";
+      return OID_Octet_Array;
+   end Put_OID_Value;
+     
 end Hermes.DER.Encode;
-

@@ -295,7 +295,7 @@ package body Hermes.DER.Decode is
       Start   : in  Natural;
       Stop    : out Natural;
       Value   : out Integer;
-      Status  : out Status*_Type) is
+      Status  : out Status_Type) is
 
       Tag_Class         : Tag_Class_Type;
       Structured_Flag   : Structured_Flag_Type;

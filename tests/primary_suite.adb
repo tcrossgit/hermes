@@ -9,6 +9,7 @@
 ---------------------------------------------------------------------------
 with Check_DER_Decode;
 with Check_DER_Encode;
+with Check_OID;
 with Check_Trivial;
 
 package body Primary_Suite is
@@ -21,6 +22,7 @@ package body Primary_Suite is
    Test_0 : aliased Check_Trivial.Trivial_Test;
    Test_1 : aliased Check_DER_Decode.DER_Decode_Test;
    Test_2 : aliased Check_DER_Encode.DER_Encode_Test;
+   Test_3 : aliased Check_OID.OID_Test;
 
    -- Function to return an access to the configured suite
    function Suite return Access_Test_Suite is
@@ -28,6 +30,7 @@ package body Primary_Suite is
       Add_Test(Suite_Object'Access, Test_0'Access);
       Add_Test(Suite_Object'Access, Test_1'Access);
       Add_Test(Suite_Object'Access, Test_2'Access);
+      Add_Test(Suite_Object'Access, Test_3'Access);
       return Suite_Object'Access;
    end Suite;
 
